@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopAI - Intelligent Shopping Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 700px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .info-panel {
+            color: white;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .info-panel h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .info-panel p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .features {
+            display: grid;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .feature {
+            background: rgba(255,255,255,0.15);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 4px solid #fbbf24;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(5px);
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            padding: 14px 18px;
+            border-radius: 14px;
+            max-width: 85%;
+            line-height: 1.6;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            align-self: flex-end;
+            border-radius: 14px 4px 14px 14px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .ai-message {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-radius: 4px 14px 14px 14px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .ai-message strong {
+            color: #667eea;
+        }
+
+        .chat-input-container {
+            padding: 16px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .welcome-box {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-box p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .command-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .command {
+            bg: white;
+            padding: 8px 12px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 6px;
+            border-left: 2px solid #667eea;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .info-panel {
+                text-align: center;
+            }
+
+            .info-panel h1 {
+                font-size: 36px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="info-panel">
+            <h1>🛒 ShopAI</h1>
+            <p>Your intelligent shopping assistant powered by AI. Place orders, check inventory, and track shipments with natural language.</p>
+
+            <div class="features">
+                <div class="feature">✨ <strong>Smart Intent Recognition:</strong> Understands your shopping needs naturally</div>
+                <div class="feature">📦 <strong>Real-time Inventory:</strong> Check product availability instantly</div>
+                <div class="feature">📋 <strong>Order Tracking:</strong> Monitor your orders in real-time</div>
+                <div class="feature">⚡ <strong>Fast Processing:</strong> Orders processed via Kafka streaming</div>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>💬 Chat Assistant</h2>
+                <p>Ask me anything about your orders</p>
+            </div>
+
+            <div class="chat-messages" id="messages">
+                <div class="message ai-message">
+                    <div class="welcome-box">
+                        <p><strong>👋 Welcome to ShopAI!</strong></p>
+                        <p>I can help you with:</p>
+                        <div class="command-list">
+                            <div class="command">📦 Order 2 iPhones</div>
+                            <div class="command">✅ Check iPhone stock</div>
+                            <div class="command">📊 Order status #123</div>
+                            <div class="command">📁 Show my orders</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    class="chat-input"
+                    placeholder="Type your query here... (e.g., 'Order 2 iPhones')" 
+                    onkeypress="handleKey(event)"
+                />
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            appendMessage(prompt, 'user');
+            input.value = '';
+            input.focus();
+
+            appendMessage('', 'ai', 'typing-msg');
+
+            try {
+                const url = new URL('/ai/chat', window.location.origin);
+                url.searchParams.append('prompt', prompt);
+                
+                const response = await fetch(url.toString(), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'text/plain'
+                    }
+                });
+
+                // Remove typing indicator
+                const typingMsg = document.getElementById('typing-msg');
+                if (typingMsg) typingMsg.remove();
+
+                // Check if response is successful
+                if (!response.ok) {
+                    console.error(`Error: ${response.status} ${response.statusText}`);
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    appendMessage(`❌ Error: ${response.status} ${response.statusText}`, 'ai');
+                    return;
+                }
+
+                const result = await response.text();
+                console.log('Response received:', result);
+                appendMessage(result, 'ai');
+            } catch (e) {
+                console.error('Fetch error:', e);
+                const typingMsg = document.getElementById('typing-msg');
+                if (typingMsg) typingMsg.remove();
+                appendMessage(`❌ Connection error: ${e.message}`, 'ai');
+            }
+        }
+
+        function appendMessage(text, sender, id = '') {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${sender === 'user' ? 'user-message' : 'ai-message'}`;
+            
+            if (id === 'typing-msg') {
+                div.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+                div.id = id;
+            } else {
+                div.textContent = text;
+            }
+
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Auto-focus input on load
+        window.addEventListener('load', () => {
+            document.getElementById('userInput').focus();
+        });
+    </script>
+</body>
+</html>
+```
+
+---
+
+## Final Flow 🎯
+```
+User types "Order 2 iPhones"
+        │
+        ▼
+AiController → AiService
+        │
+        ▼
+Gemini extracts → {"intent":"PLACE_ORDER","productName":"iPhone","quantity":2}
+        │
+        ▼
+Fetch product from Product Service (REST)
+        │
+        ▼
+Place order → Kafka → Payment + Stock update
+        │
+        ▼
+"✅ Order placed successfully with ID: 5"
